@@ -46,7 +46,7 @@ const Home: React.FC<HomePropsType> = ({home, articles}) => {
                                         {article.fields.description}
                                     </CardText>
                                     <Link href={`/articles/${article.fields.slug}`}>
-                                        <Button>
+                                        <Button style={{width: '100%'}}>
                                             {article.fields.action}
                                         </Button>
                                     </Link>
