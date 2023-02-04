@@ -1,16 +1,18 @@
 import React from "react";
 import Head from 'next/head'
+import Link from "next/link";
 import {GetStaticProps} from "next";
 import client from "../contentful/index";
-import {IHome, IHomeFields} from "../contentful";
+import {IArticle, IArticleFields, IHome, IHomeFields} from "../contentful";
 import {documentToReactComponents} from '@contentful/rich-text-react-renderer';
-import {Container, Row, Col} from 'reactstrap'
+import {Container, Row, Col, Card, CardTitle, CardText, Button} from 'reactstrap'
 
 type HomePropsType = {
-    home: IHome
+    home: IHome,
+    articles: IArticle[]
 }
 
-const Home: React.FC<HomePropsType> = ({home}) => {
+const Home: React.FC<HomePropsType> = ({home, articles}) => {
     return (
         <>
             <Head>
@@ -31,6 +33,28 @@ const Home: React.FC<HomePropsType> = ({home}) => {
                         {documentToReactComponents(home.fields.description!)}
                     </div>
                 </div>
+
+                <Container className={"pt-5"}>
+                    <Row>
+                        {articles.map(article =>
+                            <Col sm={4} key={article.fields.slug}>
+                                <Card body>
+                                    <CardTitle tag={"h5"}>
+                                        {article.fields.title}
+                                    </CardTitle>
+                                    <CardText>
+                                        {article.fields.description}
+                                    </CardText>
+                                    <Link href={`/articles/${article.fields.slug}`}>
+                                        <Button>
+                                            {article.fields.action}
+                                        </Button>
+                                    </Link>
+                                </Card>
+                            </Col>
+                        )}
+                    </Row>
+                </Container>
             </main>
         </>
     )
@@ -44,11 +68,17 @@ export const getStaticProps: GetStaticProps = async () => {
         limit: 1
     })
 
+    const articleEntries = await client.getEntries<IArticleFields>({
+        content_type: 'article',
+        select: 'fields.title, fields.slug, fields.description, fields.action'
+    })
+
     const [homePage] = home.items
 
     return {
         props: {
-            home: homePage
+            home: homePage,
+            articles: articleEntries.items
         }
     }
 }
